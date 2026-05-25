@@ -5214,7 +5214,7 @@ def main():
                 pygame.draw.rect(surface, (0, 0, 0, 204), (0, 0, WINDOW_SIZE[0], WINDOW_SIZE[1]))
                 screen.blit(surface, (0, 0))
 
-                # Отрисовка лога консоли (истории)
+                # Отрисовка лога консоли
                 if hasattr(game, 'console_log') and game.console_log:
                     log_h = len(game.console_log) * 25
                     log_y = WINDOW_SIZE[1] - 45 - log_h
