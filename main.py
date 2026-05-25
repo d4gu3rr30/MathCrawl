@@ -23,7 +23,7 @@ pygame.mixer.init()
 pygame.key.set_repeat(300, 50)
 info = pygame.display.Info()
 WINDOW_SIZE = (800, 600)
-# Используем флаг SCALED для автоматического сохранения пропорций при растягивании
+# флаг SCALED для автоматического сохранения пропорций при растягивании
 screen = pygame.display.set_mode(WINDOW_SIZE, pygame.SCALED)
 is_fullscreen = False
 pygame.display.set_caption('MATHCRAWL - Образовательный Roguelike')
@@ -31,7 +31,6 @@ clock = pygame.time.Clock()
 
 menu_music = pygame.mixer.Sound('Music/menu0loop.mp3')
 menu_music.set_volume(0.5)
-# Автовоспроизведение перенесено в функцию main(), чтобы играть после заставки
 
 level_music = pygame.mixer.Sound('Music/lvl1.mp3')
 level_music.set_volume(0.5)
@@ -195,15 +194,11 @@ except Exception as e:
 
 explosion_frames = []
 try:
-    # Загружаем наш новый спрайт-шит в формате PNG
     exp_sheet = pygame.image.load('tileset/explosion_sheet.png').convert_alpha()
 
-    # Так как мы экспортировали Horizontal Strip из квадратного холста,
-    # ширина одного кадра равна высоте всей картинки.
     frame_size = exp_sheet.get_height()
     frames_count = exp_sheet.get_width() // frame_size
 
-    # Нарезаем длинную картинку на отдельные кадры
     for i in range(frames_count):
         rect = pygame.Rect(i * frame_size, 0, frame_size, frame_size)
         frame = exp_sheet.subsurface(rect)
@@ -230,7 +225,7 @@ cursor_hand = pygame.image.load('tileset/cursorhand.png').convert_alpha()
 cursor_hand = pygame.transform.scale(cursor_hand, (32, 32))
 current_cursor = cursor
 
-coin_img = pygame.image.load('tileset/gold-coin.png').convert_alpha()
+coin_img = pygame.image.load('tileset/gold_coin.png').convert_alpha()
 coin_img = pygame.transform.scale(coin_img, (20, 20))
 
 coin_frames = []
@@ -244,7 +239,6 @@ except Exception as e:
     print("Ошибка загрузки gold_coin_sheet.png:", e)
     coin_frames = [coin_img]
 
-# Загрузка и нарезка спрайтшита врагов (256x256 -> 16 кадров по 64x64)
 enemy_frames = {'down': [], 'left': [], 'right': [], 'up': []}
 try:
     sheet = pygame.image.load('tileset/enemy_sheet.png').convert_alpha()
@@ -312,7 +306,7 @@ try:
 
     # Цвета для автоматической перекраски портала
     portal_colors = {
-        RoomType.NORMAL: None,  # Оригинальный синий
+        RoomType.NORMAL: None,
         RoomType.TREASURE: GOLD,
         RoomType.SHOP: GREEN,
         RoomType.BOSS: RED,
@@ -927,11 +921,8 @@ class Merchant:
             menu_x = (WINDOW_SIZE[0] - menu_width) // 2
             menu_y = (WINDOW_SIZE[1] - menu_height) // 2
 
-            # Основной фон меню (темный киберпанк)
             pygame.draw.rect(screen, (20, 20, 25), (menu_x, menu_y, menu_width, menu_height))
-            # Неоновая рамка
             pygame.draw.rect(screen, CYAN, (menu_x, menu_y, menu_width, menu_height), 3)
-            # Заголовок
             pygame.draw.rect(screen, (40, 40, 50), (menu_x, menu_y, menu_width, 40))
             pygame.draw.rect(screen, CYAN, (menu_x, menu_y, menu_width, 40), 2)
 
@@ -952,7 +943,6 @@ class Merchant:
             for i, item in enumerate(self.current_offerings):
                 y_pos = menu_y + 60 + i * 90
 
-                # Подложка для каждого товара
                 item_bg_rect = pygame.Rect(menu_x + 10, y_pos, menu_width - 20, 80)
                 if item_bg_rect.collidepoint(mouse_pos):
                     pygame.draw.rect(screen, (40, 40, 50), item_bg_rect, border_radius=8)
@@ -1229,7 +1219,7 @@ class Room:
             if portal_valid and player:
                 dist = math.sqrt(
                     (x + 20 - (player.x + player.size // 2)) ** 2 + (y + 20 - (player.y + player.size // 2)) ** 2)
-                if dist < 120:  # Безопасная дистанция от игрока
+                if dist < 120:
                     portal_valid = False
 
             if portal_valid:
@@ -1263,7 +1253,6 @@ class Room:
                     enemy_spawn_attempts += 1
                     continue
 
-            # Для босса проверяем увеличенную зону, для остальных стандартную
             spawn_size = 100 if behavior == "boss" else 70
             for wall in self.walls:
                 if (
@@ -1437,7 +1426,7 @@ class Inventory:
         title = title_font.render("ИНВЕНТАРЬ И СТАТИСТИКА", True, GOLD)
         screen.blit(title, (WINDOW_SIZE[0] // 2 - title.get_width() // 2, panel_y + 15))
 
-        # --- ЛЕВАЯ ПАНЕЛЬ: СТАТЫ ---
+        # левая панель статистики
         stats_x = panel_x + 30
         stats_y = panel_y + 80
         pygame.draw.rect(screen, (20, 20, 25), (stats_x - 10, stats_y - 10, 250, panel_height - 90), border_radius=10)
@@ -1460,7 +1449,7 @@ class Inventory:
             screen.blit(s_name, (stats_x, stats_y + i * 40))
             screen.blit(s_val, (stats_x + 230 - s_val.get_width(), stats_y + i * 40))
 
-        # --- ПРАВАЯ ПАНЕЛЬ: ПРЕДМЕТЫ ---
+        # правая панель предметов
         inv_x = stats_x + 280
         inv_y = stats_y
 
@@ -1515,7 +1504,7 @@ class Inventory:
                     item = self.items[idx]
 
                     if hasattr(item, 'icon'):
-                        # Масштабируем иконку (обычно она 48x48) под ячейку
+                        # Масштабирование иконки под ячейку
                         icon_rect = item.icon.get_rect(center=(x + self.cell_size // 2, y + self.cell_size // 2))
                         screen.blit(item.icon, icon_rect.topleft)
                     else:
@@ -1612,7 +1601,7 @@ class Player:
         self.game = game
         self.size = 50
 
-        # Применяем мета-прокачку
+        # мета прокачка
         meta_speed_bonus = game.meta_upgrades['speed'] * 0.25
         self.speed = 5 + meta_speed_bonus
 
@@ -1724,7 +1713,6 @@ class Player:
         if self.is_dashing:
             self.trail_positions.append((self.x, self.y, self.angle, current_time))
 
-        # Удаляем старые следы (старше 150 мс)
         self.trail_positions = [t for t in self.trail_positions if current_time - t[3] < 150]
 
         for tx, ty, tangle, ttime in self.trail_positions:
@@ -1749,9 +1737,9 @@ class Player:
         rotated_image = pygame.transform.rotate(self.image, math.degrees(-self.angle) + 0)
         new_rect = rotated_image.get_rect(center=(self.x + self.size // 2, self.y + self.size // 2))
 
-        # Анимация рывка (полупрозрачность) и мерцания при получении урона
+        # Анимация рывка и мерцания при получении урона
         if getattr(self, 'dash_ready_flash_time', 0) > 0 and current_time - self.dash_ready_flash_time < 150:
-            # Вспышка циановым (неоновым) цветом когда рывок восстановился
+            # Вспышка циановым цветом когда рывок восстановился
             rotated_image.fill((0, 200, 200), special_flags=pygame.BLEND_RGB_ADD)
             screen.blit(rotated_image, new_rect.topleft)
         elif self.is_dashing or self.is_cloaked:
@@ -1790,7 +1778,7 @@ class Player:
         if self.is_dashing and current_time - self.last_dash_time > self.dash_duration:
             self.is_dashing = False
 
-        # Отслеживание восстановления рывка (запуск вспышки)
+        # Отслеживание восстановления рывка
         dash_is_ready_now = (current_time - self.last_dash_time >= self.dash_cooldown)
         if dash_is_ready_now and not getattr(self, 'dash_was_ready', True):
             self.dash_ready_flash_time = current_time
@@ -1800,7 +1788,6 @@ class Player:
         dy = mouse_pos[1] - (self.y + self.size // 2)
         self.target_angle = math.atan2(dy, dx)
 
-        # Бонусы характеристик теперь вычисляются динамически через @property
 
     def melee_attack(self, current_room):
         if getattr(self, 'is_dying', False): return
@@ -1818,7 +1805,7 @@ class Player:
                     elif enemy.phase == 2 and enemy.health < enemy.max_health * 0.33:
                         enemy.health = enemy.max_health * 0.33
                     elif enemy.phase == 3 and enemy.health <= 0 and getattr(enemy, 'state', '') != 'dying':
-                        enemy.health = 1  # Оставляем 1 хп для проигрывания анимации
+                        enemy.health = 1
                         enemy.state = 'dying'
                         enemy.invulnerable = True
                         enemy.death_timer = pygame.time.get_ticks()
@@ -1837,7 +1824,7 @@ class Player:
                     current_room.enemies.remove(enemy)
                     if current_room.type != RoomType.BOSS:
                         current_room.coins.append(Coin(enemy.x, enemy.y, enemy.money))
-                    if random.random() < 0.10:  # 10% шанс на аптечку в рукопашной
+                    if random.random() < 0.10:  # 10% шанс на аптечку
                         if not hasattr(current_room, 'medkits'): current_room.medkits = []
                         current_room.medkits.append(Medkit(enemy.x, enemy.y, random.choice([1, 2])))
 
@@ -1869,7 +1856,7 @@ class Player:
             if 'shoot_sound' in globals() and shoot_sound:
                 base_vol = 0.5 * self.game.sound_volume
                 if weapon.fire_rate < 150:
-                    base_vol *= 0.25  # Делаем автоматы и огнемет намного тише
+                    base_vol *= 0.25  # автоматы и огнемет намного тише
                 shoot_sound.set_volume(base_vol)
                 shoot_sound.play()
             self.last_shoot_sound_time = current_time
@@ -1877,7 +1864,7 @@ class Player:
         # Легкая тряска экрана при выстреле
         self.game.screen_shake = max(getattr(self.game, 'screen_shake', 0), 3)
 
-        # Вылет гильзы (исключаем энергетическое, взрывное и специальное оружие)
+        # Вылет гильзы
         if current_room and weapon.name not in ["Rocket Launcher", "Grenade Launcher", "Flamethrower", "Railgun",
                                                 "Crossbow"]:
             shell_angle = math.atan2(target_y - (self.y + self.size // 2),
@@ -1903,7 +1890,7 @@ class Player:
             b = Bullet(self.x + self.size // 2, self.y + self.size // 2, angle, damage, is_explosive, bullet_effect)
             if weapon.name == "Flamethrower":
                 b.color = ORANGE
-                b.size = random.randint(8, 14)  # Выглядит как сгусток огня
+                b.size = random.randint(8, 14)
                 b.speed = 8 * speed_mult
             elif weapon.name == "Railgun":
                 b.color = CYAN
@@ -2023,13 +2010,12 @@ class DamageText:
         self.font = pygame.font.Font('PixelizerBold.ttf', 20)
         self.alpha = 255
         self.speed_y = 1.5
-        self.lifetime = 60  # Время жизни (в кадрах)
+        self.lifetime = 60
 
     def update(self):
         self.y -= self.speed_y
         self.lifetime -= 1
         if self.lifetime < 20:
-            # Плавное затухание в конце
             self.alpha = max(0, int((self.lifetime / 20) * 255))
 
     def draw(self, screen):
@@ -2054,7 +2040,7 @@ class Particle:
     def update(self):
         self.x += self.dx
         self.y += self.dy
-        self.dx *= 0.85  # Трение о воздух
+        self.dx *= 0.85 
         self.dy *= 0.85
         self.size *= 0.92
         self.lifetime -= 1
@@ -2103,7 +2089,7 @@ class Explosion:
         self.y = y
         self.frames = explosion_frames
         self.current_frame = 0
-        self.anim_speed = 30 # миллисекунд на кадр
+        self.anim_speed = 30
         self.last_update = pygame.time.get_ticks()
         self.is_finished = False
 
@@ -2163,9 +2149,9 @@ class Enemy:
         self.max_health = self.health
         self.bullets = []
 
-        # Специфичные переменные для новых врагов
+        # переменные для новых врагов
         self.last_shot_time = pygame.time.get_ticks()
-        self.shoot_cooldown = 2000  # 2 секунды для снайпера
+        self.shoot_cooldown = 2000 
         self.ghost_timer = pygame.time.get_ticks()
         self.is_ghost = False
         self.hit_timer = 0
@@ -2176,14 +2162,14 @@ class Enemy:
         self.last_burn_damage = 0
         self.freeze_time = 0
 
-        # Хитбокс для столкновений (меньше визуального размера)
+        # Хитбокс для столкновений
         self.hitbox_size = int(self.size * 0.45)
 
         # Параметры анимации
         self.direction = 'down'
         self.anim_frame = 0
         self.last_anim_update = pygame.time.get_ticks()
-        self.anim_speed = 150  # миллисекунд на смену кадра (скорость перебирания ногами)
+        self.anim_speed = 150
 
         # Динамический размер награды с врагов
         base_money = random.randint(5, 15)
@@ -2220,7 +2206,6 @@ class Enemy:
             frame_to_draw = enemy_frames[self.direction][self.anim_frame].copy()
             frame_to_draw = pygame.transform.scale(frame_to_draw, (self.size, self.size))
 
-            # Если это призрак и он невидим - делаем его полупрозрачным
             if self.enemy_type == "ghost" and self.is_ghost:
                 frame_to_draw.set_alpha(80)
 
@@ -2252,14 +2237,13 @@ class Enemy:
                 else:
                     pygame.draw.rect(screen, draw_color, (self.x, self.y, self.size, self.size))
 
-        # Полоска здоровья (перенесена под врага)
+        # Полоска здоровья
         health_ratio = self.health / self.max_health
         pygame.draw.rect(screen, RED, (self.x, self.y + self.size + 5, self.size, 5))
         pygame.draw.rect(screen, GREEN, (self.x, self.y + self.size + 5, self.size * health_ratio, 5))
 
         # Отрисовка парящего экрана над врагом
         if self.math_value is not None:
-            # Экран теперь "левитирует" над спрайтом
             monitor_width = int(self.size * 0.6)
             monitor_height = int(self.size * 0.35)
             monitor_x = self.x + (self.size - monitor_width) // 2
@@ -2270,7 +2254,7 @@ class Enemy:
             pygame.draw.rect(s, (0, 0, 0, 200), (0, 0, monitor_width, monitor_height), border_radius=5)
             screen.blit(s, (monitor_x, monitor_y))
 
-            # Неоновая рамка (белая/циановая или зелёная при подсказке)
+            # рамка
             frame_color = GREEN if (hint_mode and getattr(self, 'is_correct', False)) else CYAN
             pygame.draw.rect(screen, frame_color, (monitor_x, monitor_y, monitor_width, monitor_height), 2,
                              border_radius=5)
@@ -2312,19 +2296,16 @@ class Enemy:
             is_moving = True
 
             if self.enemy_type == "sniper":
-                # Снайпер держит дистанцию
                 if dist < 200:
-                    dx = -dx  # Убегает
+                    dx = -dx 
                     dy = -dy
                 elif dist > 350:
-                    pass  # Догоняет
+                    pass
                 else:
                     is_moving = False  # Останавливается, чтобы стрелять
 
             if is_moving:
-                # Вспомогательная функция для проверки коллизий (с использованием hitbox_size вместо size)
                 def check_move(test_dx, test_dy):
-                    # Вычисляем сдвиг для центрирования хитбокса
                     offset = (self.size - getattr(self, 'hitbox_size', self.size)) / 2
                     hit_x = self.x + test_dx + offset
                     hit_y = self.y + test_dy + offset
@@ -2355,7 +2336,6 @@ class Enemy:
                 else:
                     moved_x = False
                     moved_y = False
-                    # Пробуем идти только по горизонтали или только по вертикали
                     if abs(dx_step) > 0.1 and check_move(dx_step, 0):
                         self.x += dx_step
                         moved_x = True
@@ -2366,24 +2346,21 @@ class Enemy:
                     if moved_x or moved_y:
                         moved = True
 
-                # Если уткнулись в стену ровно по прямой (например, dx_step заблокирован), то пытаемся соскользнуть по ортогональной оси в сторону игрока
+               
                 if not moved:
                     if abs(dx) > abs(dy):
-                        # Уперлись по X, пытаемся скользить по Y
                         slide_dir = self.speed if dy > 0 else -self.speed
                         if check_move(0, slide_dir):
                             self.y += slide_dir
                         elif check_move(0, -slide_dir):
                             self.y -= slide_dir
                     else:
-                        # Уперлись по Y, пытаемся скользить по X
                         slide_dir = self.speed if dx > 0 else -self.speed
                         if check_move(slide_dir, 0):
                             self.x += slide_dir
                         elif check_move(-slide_dir, 0):
                             self.x -= slide_dir
 
-                # Направление анимации зависит от главной цели, чтобы избежать вращения
                 if abs(dx) > abs(dy):
                     self.direction = 'right' if dx > 0 else 'left'
                 else:
@@ -2396,7 +2373,6 @@ class Enemy:
         test_dx = math.cos(angle) * force
         test_dy = math.sin(angle) * force
 
-        # Вычисляем точный хитбокс для проверки отбрасывания
         offset = (self.size - getattr(self, 'hitbox_size', self.size)) / 2
         hit_x = self.x + test_dx + offset
         hit_y = self.y + test_dy + offset
@@ -2404,13 +2380,11 @@ class Enemy:
 
         can_move = True
 
-        # Проверяем, не влетим ли мы в стену при отбрасывании
         for wall in walls:
             if hit_x + hit_s > wall.x and hit_x < wall.x + wall.size and hit_y + hit_s > wall.y and hit_y < wall.y + wall.size:
                 can_move = False
                 break
 
-        # Проверяем, не влетим ли мы в другого врага
         if can_move:
             for other_enemy in enemies:
                 if other_enemy != self:
@@ -2422,7 +2396,6 @@ class Enemy:
                         can_move = False
                         break
 
-        # Если путь свободен - отбрасываем
         if can_move:
             self.x += test_dx
             self.y += test_dy
@@ -2513,7 +2486,7 @@ class Boss(Enemy):
         if getattr(self, 'is_dashing', False):
             img.fill((255, 50, 50), special_flags=pygame.BLEND_RGB_MULT)
         elif getattr(self, 'dash_warning', False):
-            img.fill((255, 180, 180), special_flags=pygame.BLEND_RGB_ADD)  # Яркая красная вспышка перед рывком
+            img.fill((255, 180, 180), special_flags=pygame.BLEND_RGB_ADD)
         elif self.phase == 2:
             img.fill((200, 150, 100), special_flags=pygame.BLEND_RGB_MULT)
         elif self.phase == 3:
@@ -2533,7 +2506,7 @@ class Boss(Enemy):
             img.fill((current_time % 255, 0, 0), special_flags=pygame.BLEND_RGB_MULT)
 
         if getattr(self, 'dash_warning', False):
-            # Линия прицеливания (Телеграф рывка)
+            # Линия прицеливания
             end_x = self.x + self.size // 2 + math.cos(self.dash_target_angle) * 1000
             end_y = self.y + self.size // 2 + math.sin(self.dash_target_angle) * 1000
             pygame.draw.line(screen, (255, 50, 50), (self.x + self.size // 2, self.y + self.size // 2),
@@ -2549,10 +2522,8 @@ class Boss(Enemy):
             slash_img = boss_attack_frames[frame_idx]
             angle = getattr(self, 'attack_anim_angle', 0)
 
-            # Поворачиваем взмах по направлению атаки
             slash_img_rot = pygame.transform.rotate(slash_img, math.degrees(-angle))
 
-            # Смещаем взмах от центра босса вперед по направлению атаки
             offset_x = math.cos(angle) * (self.size * 0.6)
             offset_y = math.sin(angle) * (self.size * 0.6)
             slash_rect = slash_img_rot.get_rect(
@@ -2589,9 +2560,8 @@ class Boss(Enemy):
                     target.game.current_room.explosions.append(
                         Explosion(self.x + random.randint(0, self.size), self.y + random.randint(0, self.size)))
 
-            # Босс окончательно умирает через 3 секунды анимации
             if current_time - self.death_timer > 3000:
-                self.health = 0  # Триггер настоящей смерти для появления портала
+                self.health = 0
             return
 
         if self.state == 'waiting_math':
@@ -2605,14 +2575,14 @@ class Boss(Enemy):
             return
 
         if getattr(self, 'dash_warning', False):
-            if current_time - self.dash_warning_timer > 300:  # 0.3 секунды на предупреждение
+            if current_time - self.dash_warning_timer > 300:
                 self.dash_warning = False
                 self.is_dashing = True
                 self.dash_timer = current_time
                 self.dash_dx = math.cos(self.dash_target_angle) * 22
                 self.dash_dy = math.sin(self.dash_target_angle) * 22
                 if hasattr(target, 'game'): target.game.screen_shake = 8
-            return  # Во время прицеливания не двигаемся
+            return 
 
         if self.shield_charging and current_time - self.shield_charge_timer > 500:
             self.shield_charging = False
@@ -2622,7 +2592,7 @@ class Boss(Enemy):
         if self.is_shooting_barrage:
             if current_time - self.barrage_timer > 1500:
                 self.is_shooting_barrage = False
-            elif current_time - self.last_barrage_shot > 150:  # Выстрел каждые 150мс
+            elif current_time - self.last_barrage_shot > 150:
                 self.last_barrage_shot = current_time
                 dirs = 3 if self.phase == 1 else 5
                 base = random.uniform(0, math.pi)
@@ -2707,7 +2677,6 @@ class Boss(Enemy):
                 if abs(target_dy) > 0.1 and check_boss_move(0, target_dy):
                     self.y += target_dy
 
-        # Позволяем боссу немного заходить за визуальные границы, опираясь на физический хитбокс
         self.x = max(40 - offset, min(self.x, WINDOW_SIZE[0] - 40 - self.size + offset))
         self.y = max(40 - offset, min(self.y, WINDOW_SIZE[1] - 40 - self.size + offset))
 
@@ -2730,7 +2699,7 @@ class Boss(Enemy):
                 if current_time - cone['last_wave_time'] >= 500:
                     self.boss_anim_state = "attack"
                     self.attack_anim_timer = current_time
-                    self.attack_anim_angle = cone['angle']  # Сохраняем угол для отрисовки взмаха
+                    self.attack_anim_angle = cone['angle'] 
                     if 'boss_attack_snd' in globals() and boss_attack_snd: boss_attack_snd.play()
 
                     w = Bullet(self.x + self.size // 2, self.y + self.size // 2, cone['angle'], 2)
@@ -2743,7 +2712,6 @@ class Boss(Enemy):
                     cone['waves_spawned'] += 1
                     cone['last_wave_time'] = current_time
 
-                    # До 3 волн в одну сторону
                     if cone['waves_spawned'] >= 3:
                         self.cones.remove(cone)
 
@@ -2816,7 +2784,6 @@ class Chest:
         self.anim_frame = 0
         self.last_anim_time = 0
 
-        # Выбираем только те артефакты, которых еще нет у игрока
         available_artifacts = []
         for a in game.artifacts_pool:
             has_artifact = False
@@ -2931,10 +2898,19 @@ class Weapon:
         self.current_reload_duration = 1000
 
         self.reload_frames = []
-        for i in range(1, 23):
-            frame = pygame.image.load(f'reloadAnimation/reload{i}.png')
-            frame = pygame.transform.scale(frame, (50, 50))
-            self.reload_frames.append(frame)
+        try:
+            sheet = pygame.image.load('tileset/reload_sheet.png').convert_alpha()
+            frame_size = sheet.get_height()
+            frames_count = sheet.get_width() // frame_size
+
+            for i in range(frames_count):
+                rect = pygame.Rect(i * frame_size, 0, frame_size, frame_size)
+                frame = sheet.subsurface(rect)
+                self.reload_frames.append(pygame.transform.scale(frame, (50, 50)))
+        except Exception as e:
+            print(f"Ошибка загрузки reload_sheet.png: {e}")
+            dummy = pygame.Surface((50, 50), pygame.SRCALPHA)
+            self.reload_frames = [dummy]
         self.current_frame = 0
 
     def can_shoot(self, current_time):
@@ -2973,18 +2949,14 @@ class Button:
         mouse_pos = pygame.mouse.get_pos()
         is_hovered = self.rect.collidepoint(mouse_pos)
 
-        # Осветляем цвет при наведении
         r = min(255, self.color[0] + (30 if is_hovered else 0))
         g = min(255, self.color[1] + (30 if is_hovered else 0))
         b = min(255, self.color[2] + (30 if is_hovered else 0))
         current_color = (r, g, b)
 
-        # Тень от кнопки
         pygame.draw.rect(screen, (20, 20, 20), (self.rect.x + 4, self.rect.y + 6, self.rect.width, self.rect.height),
                          border_radius=8)
-        # Сама кнопка
         pygame.draw.rect(screen, current_color, self.rect, border_radius=8)
-        # Рамка
         pygame.draw.rect(screen, WHITE if is_hovered else (200, 200, 200), self.rect, 2, border_radius=8)
 
         text_surface = self.font.render(self.text, True, WHITE)
@@ -3025,7 +2997,6 @@ class Game:
         self.music_volume = 0.5
         pygame.mixer.music.set_volume(self.music_volume)
 
-        # Уплотняем кнопки меню, чтобы влезла кнопка "Управление"
         self.play_button = Button(WINDOW_SIZE[0] // 2 - 100, WINDOW_SIZE[1] // 2 - 140, 200, 50, "Играть",
                                   (50, 100, 200))
         self.meta_shop_button = Button(WINDOW_SIZE[0] // 2 - 130, WINDOW_SIZE[1] // 2 - 80, 260, 50, "Мета-Магазин",
@@ -3052,7 +3023,6 @@ class Game:
         self.meta_back_button = Button(WINDOW_SIZE[0] // 2 - 100, WINDOW_SIZE[1] - 80, 200, 50, "Назад", (150, 50, 50))
         self.info_back_button = Button(WINDOW_SIZE[0] // 2 - 100, WINDOW_SIZE[1] - 80, 200, 50, "Назад", (150, 50, 50))
 
-        # Кнопка сброса
         self.hard_reset_button = Button(WINDOW_SIZE[0] // 2 - 150, WINDOW_SIZE[1] // 2 + 260, 300, 40,
                                         "СБРОС ПРОГРЕССА", (200, 50, 50))
         self.confirming_reset = False
@@ -3162,7 +3132,6 @@ class Game:
         self.screen_shake = 0
         self.game_over = False
 
-        # Создаем маски для освещения
         self.light_mask = pygame.Surface((300, 300), pygame.SRCALPHA)
         for i in range(150, 0, -3):
             alpha = int(255 * (i / 150))
@@ -3388,7 +3357,6 @@ class Game:
                         new_pos = pos
                         break
 
-                # Если все 4 стороны заняты, находим ближайшую свободную клетку по спирали
                 if new_pos is None:
                     radius = 1
                     found = False
@@ -3430,8 +3398,7 @@ class Game:
                 self.player.x = (WINDOW_SIZE[0] - self.player.size) // 2
                 self.player.y = (WINDOW_SIZE[1] - self.player.size) // 2
 
-                # Очищаем и перерисовываем пол для новой комнаты, чтобы убрать следы
-                self.floor_surface.fill((0, 0, 0))  # Сброс поверхности
+                self.floor_surface.fill((0, 0, 0)) 
                 for x, y in self.current_room.floor_positions:
                     self.floor_surface.blit(floor_texture, (x, y))
 
@@ -4073,10 +4040,9 @@ class Game:
                 draw_x = center_x + dx * (cell_size + 2) - cell_size // 2
                 draw_y = center_y + dy * (cell_size + 2) - cell_size // 2
 
-                # Рисуем только если комната помещается в рамки миникарты
                 if map_rect.collidepoint(draw_x, draw_y) and map_rect.collidepoint(draw_x + cell_size,
                                                                                    draw_y + cell_size):
-                    color = (100, 100, 100)  # Серая (обычная зачищенная)
+                    color = (100, 100, 100) 
 
                     if pos_key == self.current_room_pos:
                         color = WHITE
@@ -4090,7 +4056,6 @@ class Game:
                     pygame.draw.rect(screen, color, (draw_x, draw_y, cell_size, cell_size))
                     pygame.draw.rect(screen, (50, 50, 50), (draw_x, draw_y, cell_size, cell_size), 1)
 
-                    # Если комната обнаружена, но еще не зачищена - ставим точку
                     if not room.cleared and pos_key != self.current_room_pos:
                         pygame.draw.rect(screen, RED, (draw_x + cell_size // 2 - 2, draw_y + cell_size // 2 - 2, 4, 4))
 
@@ -4112,7 +4077,7 @@ def main():
         icon_img = None
         print("Ошибка загрузки иконки:", e)
 
-    # --- ЗАСТАВКА (SPLASH SCREEN) ---
+    # Заставка
     splash_duration = 3500
     start_time = pygame.time.get_ticks()
 
@@ -4152,7 +4117,6 @@ def main():
         scale = 1.0 + progress * 0.4
         if icon_img:
             try:
-                # Берем базовый размер 96x96 и увеличиваем
                 scaled_logo = pygame.transform.smoothscale(icon_img, (int(96 * scale), int(96 * scale)))
                 scaled_logo.set_alpha(alpha)
                 logo_rect = scaled_logo.get_rect(center=(WINDOW_SIZE[0] // 2, WINDOW_SIZE[1] // 2 - 40))
@@ -4166,7 +4130,7 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
-    # --- КОНЕЦ ЗАСТАВКИ ---
+    # конец застаыки
 
     if 'menu_music' in globals() and menu_music:
         menu_music.set_volume(game.music_volume)
@@ -4454,7 +4418,7 @@ def main():
                         elif getattr(game, 'show_meta_shop', False):
                             if getattr(game, 'meta_back_button', None) and game.meta_back_button.is_clicked(mouse_pos):
                                 game.show_meta_shop = False
-                                game.reset_game()  # Обновляем статы игрока сразу после закрытия
+                                game.reset_game()  
                             else:
                                 menu_width = 740
                                 menu_height = 560
@@ -4595,8 +4559,7 @@ def main():
                                         game.player.shoot(mouse_pos[0], mouse_pos[1], game.current_room)
                                         weapon.last_shot = pygame.time.get_ticks()
 
-        # Выносим проверку зажатой кнопки мыши ЗА пределы цикла событий (event loop),
-        # чтобы автоматическое оружие стреляло всегда, даже если мышь не двигается.
+       
         if pygame.mouse.get_pressed()[0] and not game.show_menu and not game.game_over and not game.console_active:
             if not game.player.inventory.visible:
                 shop_open = (game.current_room.type == RoomType.SHOP and hasattr(game.current_room,'merchant') and game.current_room.merchant.selected_item is not None)
@@ -4666,7 +4629,7 @@ def main():
                         for _ in range(15):
                             game.current_room.particles.append(Particle(bullet.x, bullet.y, ORANGE))
                             game.current_room.particles.append(
-                                Particle(bullet.x, bullet.y, (100, 100, 100)))  # Серые куски
+                                Particle(bullet.x, bullet.y, (100, 100, 100)))
 
                         blast_radius = 250
                         for aoe_enemy in game.current_room.enemies:
@@ -4674,7 +4637,7 @@ def main():
                             if dist < blast_radius:
                                 blast_angle = math.atan2(aoe_enemy.y + aoe_enemy.size // 2 - bullet.y,
                                                          aoe_enemy.x + aoe_enemy.size // 2 - bullet.x)
-                                knockback_force = 60 * (1 - dist / blast_radius)  # Усилили отбрасывание
+                                knockback_force = 60 * (1 - dist / blast_radius)
                                 aoe_enemy.apply_knockback(blast_angle, knockback_force, game.current_room.walls,
                                                           game.current_room.enemies)
 
@@ -4773,7 +4736,7 @@ def main():
                                 if enemy.is_correct:
                                     for e in game.current_room.enemies[:]:
                                         if e != enemy and getattr(e, 'math_value', None) is not None:
-                                            # В комнате босса монеты за врагов НЕ выпадают!
+                                            # В комнате босса монеты за врагов НЕ выпадают
                                             if game.current_room.type != RoomType.BOSS:
                                                 game.current_room.coins.append(Coin(e.x, e.y, e.money))
                                             if random.random() < 0.10:
@@ -4799,7 +4762,7 @@ def main():
                                     reward = 35 if success >= 80 else (25 if success >= 50 else 15)
                                     game.player.money += reward
 
-                                    # Выдаем Очки Знаний (мета-валюта)
+                                    # мета-валюта
                                     kp_reward = game.current_room.difficulty * 3
                                     game.knowledge_points += kp_reward
                                     save_settings(game.music_volume, game.sound_volume, is_fullscreen,
@@ -4971,7 +4934,6 @@ def main():
                         b.speed = 6
                         game.current_room.enemy_bullets.append(b)
 
-                # Вычисляем центры объектов для более точного хитбокса
                 p_center = (game.player.x + game.player.size // 2, game.player.y + game.player.size // 2)
                 e_center = (enemy.x + enemy.size // 2, enemy.y + enemy.size // 2)
 
@@ -5017,7 +4979,7 @@ def main():
                 if 'level2_music' in globals() and level2_music: level2_music.stop()
                 if 'boss_music' in globals() and boss_music: boss_music.stop()
                 menu_music.stop()
-                defeat_music.play(-1)  # -1 включает бесконечное зацикливание
+                defeat_music.play(-1)
                 defeat_music.set_volume(game.music_volume)
 
             game.check_room_completion()
@@ -5035,7 +4997,7 @@ def main():
                                     {'text': f'Получено: {chest.item.name}', 'start_time': pygame.time.get_ticks()})
 
         elif (game.player.inventory.visible or game.active_menu == "escape") and game.current_room.timer_active:
-            # Сдвигаем старт таймера, пока открыт инвентарь или пауза (чтобы время не шло)
+         
             game.current_room.timer_start += clock.get_time()
 
         screen.fill(CYAN)
@@ -5052,15 +5014,12 @@ def main():
                 else:
                     screen.blit(cursor, (mouse_pos[0] - 16, mouse_pos[1] - 16))
         else:
-            # Отрисовываем игру на временную поверхность для эффекта тряски
             display_surface = pygame.Surface(WINDOW_SIZE)
 
-            # Перекрашиваем текстуры в зависимости от этажа (БЕЗ динамического освещения)
             temp_floor = floor_texture.copy()
             temp_wall = wall_texture.copy()
             temp_obs = obstacle_texture.copy()
             if getattr(game, 'floor', 1) > 1:
-                # Фиолетовый оттенок для второго этажа
                 tint = (180, 100, 220)
                 temp_floor.fill(tint, special_flags=pygame.BLEND_RGB_MULT)
                 temp_wall.fill(tint, special_flags=pygame.BLEND_RGB_MULT)
@@ -5081,11 +5040,9 @@ def main():
             for portal in game.current_room.portals:
                 p_type = portal['type']
                 if 'portal_frames' in globals() and portal_frames[p_type]:
-                    # Анимация: меняем кадр каждые 100 мс
                     frame_idx = (current_ticks // 100) % len(portal_frames[p_type])
                     display_surface.blit(portal_frames[p_type][frame_idx], (portal['x'], portal['y']))
                 else:
-                    # Запасной вариант (круги), если картинка не загрузилась
                     color = {RoomType.NORMAL: BLUE, RoomType.TREASURE: GOLD, RoomType.SHOP: GREEN, RoomType.BOSS: RED}[
                         p_type]
                     pygame.draw.circle(display_surface, color,
@@ -5154,7 +5111,6 @@ def main():
 
             screen.blit(display_surface, (shake_x, shake_y))
 
-            # HUD и интерфейс рисуем уже напрямую на screen (чтобы они не тряслись)
             if game.current_room.type in [RoomType.NORMAL, RoomType.BOSS] and game.current_room.math_problem:
                 font = pygame.font.Font('PixelizerBold.ttf', 28)
                 problem_text = font.render(game.current_room.math_problem.condition, True, WHITE)
@@ -5164,7 +5120,6 @@ def main():
                                          pygame.SRCALPHA)
                 pygame.draw.rect(text_bg, (0, 0, 0, 180), text_bg.get_rect(), border_radius=8)
 
-                # Смещаем задачу ниже, чтобы избежать конфликта с рядами сердец
                 text_x = WINDOW_SIZE[0] // 2 - problem_text.get_width() // 2
                 text_y = 85
 
@@ -5174,10 +5129,8 @@ def main():
             if game.current_room.type == RoomType.NORMAL and game.current_room.timer_active:
                 font = pygame.font.Font('PixelizerBold.ttf', 36)
                 time_text = font.render(f'Time: {int(game.current_room.time_remaining)}', True, WHITE)
-                # Сдвигаем таймер под миникарту (ниже 160 пикселей)
                 screen.blit(time_text, (WINDOW_SIZE[0] - 150, 175))
 
-            # Блок магазина перенесен ниже для правильного наложения (чтобы был поверх сердечек)
             font = pygame.font.Font('PixelizerBold.ttf', 36)
 
             # Отрисовка сердечек с переносом строк
@@ -5187,7 +5140,6 @@ def main():
             current_x = start_x
             heart_spacing = 55
 
-            # Рисуем полные сердца (каждые 2 единицы здоровья = 1 сердце)
             while drawn_health + 2 <= game.player.health:
                 if heart_img:
                     screen.blit(heart_img, (current_x, start_y))
@@ -5199,12 +5151,10 @@ def main():
                     current_x = start_x
                     start_y += 45
 
-            # Рисуем половинку, если здоровье нечетное
             if game.player.health > drawn_health:
                 if halfheart_img:
                     screen.blit(halfheart_img, (current_x, start_y))
 
-            # Красивый интерфейс для денег
             money_y = max(160, start_y + 70)
             money_val_text = font.render(str(game.player.money), True, WHITE)
             bg_width = money_val_text.get_width() + 50
@@ -5227,7 +5177,7 @@ def main():
                 ammo_rect = ammo_text.get_rect()
                 screen.blit(ammo_text, (WINDOW_SIZE[0] - ammo_rect.width - 70, WINDOW_SIZE[1] - 70))
 
-                # Отрисовка магазина (перенесено сюда, чтобы быть ПОВЕРХ интерфейса ХП и Денег)
+                # Отрисовка магазина
             if game.current_room.type == RoomType.SHOP and hasattr(game.current_room, 'merchant'):
                 merchant = game.current_room.merchant
                 merchant.draw(screen, game.player)
@@ -5277,9 +5227,8 @@ def main():
                         msg_text = game.console_font.render(msg, True, (200, 200, 200))
                         screen.blit(msg_text, (15, log_y + i * 25 + 2))
 
-                # Отрисовка подсказок (Minecraft style) со скроллом
+                # Отрисовка подсказок со скроллом
                 if game.console_suggestions:
-                    # Умный скроллинг
                     start_idx = max(0, min(game.console_suggestion_idx - 3, len(game.console_suggestions) - 7))
                     visible_suggs = game.console_suggestions[start_idx: start_idx + 7]
 
